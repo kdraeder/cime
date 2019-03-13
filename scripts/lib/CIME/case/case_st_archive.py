@@ -223,7 +223,7 @@ def _archive_history_files(archive, archive_entry,
 
     # determine ninst and ninst_string
 
-    # archive history files - the only history files that kept in the
+    # archive history files - the only history files that are kept in the
     # run directory are those that are needed for restarts
 
     for suffix in archive.get_hist_file_extensions(archive_entry):

@@ -2,7 +2,7 @@
 !
 ! !DESCRIPTION:
 !
-!    Creates cpl7 history files, instantanious, time-avg, and auxilliary
+!    Creates cpl7 history files, instantaneous, time-avg, and auxiliary
 !
 ! !REVISION HISTORY:
 !     2009-Sep-25 - B. Kauffman - move from cpl7 main program into hist module
@@ -1098,8 +1098,11 @@ contains
          stop_tod=stop_tod,                   &
          calendar=calendar)
 
-    use_stop_date = (stop_ymd - curr_ymd) == 0 .or. &
-                   ((stop_ymd - curr_ymd) == 1 .and. stop_tod == 0)
+! Date format here is stop_ymd = 20100301. 
+    use_stop_date = ((stop_ymd - curr_ymd) == 0)                     .or. &
+                    ((stop_ymd - curr_ymd) == 1 .and. stop_tod == 0) .or. &
+                    ((stop_ymd - curr_ymd) > 27 .and. stop_tod == 0)
+
 ! Having the right number of samples results in correct data being written to each file.
 !     Ignores 3, (4,) 12 hour forecasts.  All of my fixes ignore 1 hour forecasts (WACCMX).
 !     Ignores other flows; l2x, x2a, ...
@@ -1115,8 +1118,8 @@ contains
     else
        samples_per_file = nt
     endif
-    write(logunit, *) 'seq_hist_writeaux stop_{ymd,tod}, use_stop_date, samples = ', &
-         stop_ymd, stop_tod, use_stop_date, samples_per_file
+    write(logunit, *) 'seq_hist_writeaux curr_{ymd,tod}, stop_{ymd,tod}, use_stop_date, samples = '
+    write(logunit, *) curr_ymd,curr_tod, stop_ymd, stop_tod, use_stop_date, samples_per_file
 
     first_call = .true.
     do n = 1, ntout
