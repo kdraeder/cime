@@ -1201,6 +1201,7 @@ contains
              if (present(yr_offset)) then
                 yy = yy + yr_offset
              end if
+<<<<<<< HEAD
 
              if (use_stop_date) then
                 call shr_cal_ymdtod2string(date_str, yy, mm, dd, stop_tod)
@@ -1208,6 +1209,9 @@ contains
                 call shr_cal_ymdtod2string(date_str, yy, mm, dd, 0)
              endif
 
+=======
+             call shr_cal_ymdtod2string(date_str, yy, mm, dd)
+>>>>>>> origin/maint-5.6
              write(hist_file(found), "(8a)") &
                   trim(case_name),'.cpl',trim(inst_suffix),'.h',trim(aname),'.',trim(date_str), '.nc'
           else
