@@ -108,6 +108,8 @@
     <comp_archive_spec compclass="esp" compname="dart">
       <rest_file_extension>r</rest_file_extension>
       <rest_file_extension>rh\d?</rest_file_extension>
+      <!-- KDR archive the input.nml -->
+      <hist_file_extension>nml$</hist_file_extension>
       <hist_file_extension>e</hist_file_extension>
       <!-- KDR archive the mean and sd copies of initial files, but not the initial files copy.
            \D = a non-digit character.  Handle gzipped files. -->

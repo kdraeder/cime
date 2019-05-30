@@ -208,6 +208,7 @@ def _archive_history_files(archive, archive_entry,
     Not doc-testable due to case and file system dependence
     """
 
+    
     # determine history archive directory (create if it does not exist)
 
     archive_histdir = os.path.join(dout_s_root, compclass, 'hist')
@@ -229,6 +230,10 @@ def _archive_history_files(archive, archive_entry,
     for suffix in archive.get_hist_file_extensions(archive_entry):
         if compname.find('mpas') == 0:
             newsuffix =                    compname + r'\d*'
+        # KDR archive the input.nml so that it can be used for obs space diagnostics.
+        elif 'nml' in suffix:
+            logger.info("Suffix is nml$; only prepending .")
+            newsuffix = ''
         else:
             newsuffix = casename + r'\.' + compname + r'_?' + r'\d*'
         newsuffix += r'\.' + suffix

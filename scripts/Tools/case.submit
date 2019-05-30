@@ -13,6 +13,9 @@ Typical usage is simply:
 Other examples:
    ./case.submit -m begin,end
       Submits the case, requesting mail at job beginning and end
+   # KDR:
+   ./case.submit -j case.st_archive
+      Submits the short term archiver
 """
 
 from standard_script_setup import *
