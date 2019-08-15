@@ -315,7 +315,13 @@ case $MACH in
         MPIEXEC="mpirun -np $NCPUS"
       fi
       module load esmf-7.1.0r-ncdfio-mpi-O
-      module load mpt/2.15f
+      # KDR MPT launch failure work arounds:
+      # libnetcdf.a:nc_open_par_fortran failed fo find MPI_Comm_f2c
+      # and others after I changed from MPILIB from mpt to impi.
+      # Try a more recent mpt.
+      # This is the only other place in cime where 2.15f appears.
+      # module load mpt/2.15f
+      module load mpt/2.19
     fi
     # need to load module to access ncatted
     module load nco

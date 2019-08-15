@@ -11,11 +11,13 @@ Typical usage is simply:
    ./case.submit
 
 Other examples:
-   ./case.submit -m begin,end
+   ./case.submit -M begin,end
       Submits the case, requesting mail at job beginning and end
    # KDR:
    ./case.submit -j case.st_archive
       Submits the short term archiver
+      --resubmit   turns on resubmission (of the next case.run cycles)/
+                   Resubmission can be turned off only by setting env_run.xml:RESUBMIT=0
 """
 
 from standard_script_setup import *

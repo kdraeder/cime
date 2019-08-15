@@ -185,9 +185,13 @@ ifdef NETCDF_C_PATH
  else ifdef NETCDF_FORTRAN_PATH
   $(error "NETCDF_FORTRAN_PATH specified without NETCDF_C_PATH")
  else ifdef NETCDF_PATH
+  # KDR this section is run.
   NETCDF_SEPARATE:=false
   ifndef INC_NETCDF
     INC_NETCDF:=$(NETCDF_PATH)/include
+    # KDR /glade/u/apps/ch/opt/netcdf-mpi/4.6.1/mpt/2.15f/intel/17.0.1/
+    #     and this is the first reference to NETCDF_PATH
+    $(info NETCDF_PATH = $(NETCDF_PATH))
   endif
   ifndef LIB_NETCDF
     LIB_NETCDF:=$(NETCDF_PATH)/lib
@@ -361,6 +365,7 @@ else
   CC  := $(MPICC)
   FC  := $(MPIFC)
   CXX := $(MPICXX)
+# KDR This is not happening; 2.15f happens only once in list of -I.
   ifdef MPI_PATH
     INC_MPI := $(MPI_PATH)/include
     LIB_MPI := $(MPI_PATH)/lib
@@ -374,8 +379,23 @@ VPATH+=$(CSM_SHR_INCLUDE)
 # Set include paths (needed after override for any model specific builds below)
 #===============================================================================
 INCLDIR += -I$(INSTALL_SHAREDPATH)/include -I$(INSTALL_SHAREDPATH)/$(COMP_INTERFACE)/$(ESMFDIR)/$(NINST_VALUE)/include
+#                                            ../../intel/impi/nodebug/nothreads/mct/noesmf/c80a1l1i1o1r1g1w1e1/include
+# KDR        ../../intel/impi/nodebug/nothreads/include
+
+# KDR try to see where 2.15f is coming from
+# $(info which are added to INCLDIR?)
+# $(info NETCDF_SEPARATE $(NETCDF_SEPARATE))
+# $(info MOD_NETCDF      $(MOD_NETCDF))
+# $(info INC_MPI         $(INC_MPI))
+# $(info INC_NETCDF      $(INC_NETCDF))
+# $(info INC_PNETCDF     $(INC_PNETCDF))
+# $(info INC_PETSC       $(INC_PETSC))
+# $(info INC_TRILINOS    $(INC_TRILINOS))
+# $(info INC_ALBANY      $(INC_ALBANY))
+# $(info INC_MOAB        $(INC_MOAB))
 
 ifeq ($(NETCDF_SEPARATE), false)
+# KDR This one is added.
   INCLDIR += -I$(INC_NETCDF)
 else ifeq ($(NETCDF_SEPARATE), true)
   INCLDIR += -I$(INC_NETCDF_C) -I$(INC_NETCDF_FORTRAN)
@@ -383,6 +403,7 @@ endif
 ifdef MOD_NETCDF
   INCLDIR += -I$(MOD_NETCDF)
 endif
+# KDR not happening
 ifdef INC_MPI
   INCLDIR += -I$(INC_MPI)
 endif

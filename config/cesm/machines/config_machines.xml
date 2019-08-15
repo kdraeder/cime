@@ -212,7 +212,9 @@ This allows using a different mpirun command to launch unit tests
     <MPIRUN_RETRY_COUNT>10</MPIRUN_RETRY_COUNT>
     <OS>LINUX</OS>
     <COMPILERS>intel,gnu,pgi</COMPILERS>
-    <MPILIBS compiler="intel" >mpt,openmpi</MPILIBS>
+<!-- KDR added impi to get around mpt problems 2019-8-6
+    <MPILIBS compiler="intel" >mpt,openmpi</MPILIBS> -->
+    <MPILIBS compiler="intel" >mpt,openmpi,impi</MPILIBS>
     <MPILIBS compiler="pgi" >mpt</MPILIBS>
     <MPILIBS compiler="gnu" >openmpi</MPILIBS>
     <CIME_OUTPUT_ROOT>/glade/scratch/$USER</CIME_OUTPUT_ROOT>
@@ -250,6 +252,13 @@ This allows using a different mpirun command to launch unit tests
       <executable>mpirun</executable>
       <arguments>
 	<arg name="anum_tasks"> -np {{ total_tasks }}</arg>
+      </arguments>
+    </mpirun>
+<!--KDR Add the Intel MPI option to get around the MPT problems 2019-8-6 -->
+    <mpirun mpilib="impi">
+      <executable>mpirun</executable>
+      <arguments>
+	<arg name="anum_tasks"> -n {{ total_tasks }}</arg>
       </arguments>
     </mpirun>
     <mpirun mpilib="default" unit_testing="true">
@@ -302,7 +311,20 @@ This allows using a different mpirun command to launch unit tests
       <modules mpilib="mpt" compiler="intel">
 	<command name="load">mpt/2.19</command>
 	<command name="load">netcdf-mpi/4.6.1</command>
-	<command name="load">pnetcdf/1.11.0</command>
+<!--KDR this version is no longer available
+	<command name="load">pnetcdf/1.11.0</command> -->
+	<command name="load">pnetcdf/1.11.1</command>
+      </modules>
+<!--KDR Add the Intel MPI option to get around the MPT problems 2019-8-6 
+    Changed to try to get a better library:
+      netcdf-mpi from 4.6.1 to 4.6.3  (the latest)
+      pnetcdf/1.11.0 to 1.11.1 (the latest) 
+      ? impi/2019.2.187 ? -->
+      <modules mpilib="impi" compiler="intel">
+	<command name="load">impi/2017.1.132</command>
+	<command name="load">netcdf-mpi/4.6.3</command>
+	<command name="load">pnetcdf/1.11.1</command>
+	<command name="unuse">/glade/u/apps/ch/modulefiles/default/mpt/2.15f/intel/17.0.1</command>
       </modules>
       <modules mpilib="mpt" compiler="pgi">
 	<command name="load">mpt/2.15f</command>

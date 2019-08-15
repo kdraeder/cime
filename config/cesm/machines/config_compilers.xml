@@ -516,6 +516,9 @@ using a fortran linker.
     <!-- these flags enable nano timers -->
     <append MODEL="gptl"> -DHAVE_NANOTIME -DBIT64 -DHAVE_VPRINTF -DHAVE_BACKTRACE -DHAVE_SLASHPROC -DHAVE_COMM_F2C -DHAVE_TIMES -DHAVE_GETTIMEOFDAY </append>
   </CPPDEFS>
+  <!-- KDR interactively NETCDF is /glade/u/apps/ch/opt/netcdf/4.6.1/intel/17.0.1/
+       but in Makefile it's        /glade/u/apps/ch/opt/netcdf-mpi/4.6.1/mpt/2.15f/intel/17.0.1/ 
+       Was it reset by a module command? -->
   <NETCDF_PATH>$ENV{NETCDF}</NETCDF_PATH>
   <PIO_FILESYSTEM_HINTS>gpfs</PIO_FILESYSTEM_HINTS>
   <PNETCDF_PATH>$ENV{PNETCDF}</PNETCDF_PATH>
