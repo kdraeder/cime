@@ -335,7 +335,7 @@ def _create_component_modelio_namelists(case, files):
                     else:
                         sys.stdout.write(line)
             else:
-                print('Could not file ' + str(mfile))
+                print('Could not find file ' + str(mfile))
                 allExist = False
                 break
 
