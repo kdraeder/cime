@@ -303,8 +303,9 @@ def _create_component_modelio_namelists(case, files):
     if case.get_value("MULTI_DRIVER"):
         maxinst = case.get_value("NINST_MAX")
     
-    start = time.time()
-
+    #start = time.time()
+    # If all modelio namelist files already exist, this script will update the logfile name and leave everything else the same.
+    # If any files do not exist, they will all be generated in the traditional (and expensive) way
     for model in case.get_values("COMP_CLASSES"):
         model = model.lower()
 
@@ -325,14 +326,17 @@ def _create_component_modelio_namelists(case, files):
 
             mfile = os.path.join(confdir, modelio_file)
 
+            # if the namelist already exists, update the logfile line only and pass the other lines through
             if os.path.exists(mfile):
                 logfile = model + inst_string + ".log." + str(lid)
                 # update the logfile in place
                 for line in fileinput.input(mfile,inplace=1):
                     if 'logfile' in line:
-                        line = '  logfile = "' + logfile + '"'
-                        print(line)
+                        logline = '  logfile = "' + logfile + '"'
+                        # Print adds a newline character
+                        print(logline)
                     else:
+                        # line already has a newline character
                         sys.stdout.write(line)
             else:
                 print('Could not find file ' + str(mfile))
@@ -369,14 +373,13 @@ def _create_component_modelio_namelists(case, files):
                     logfile = model + inst_string + ".log." + str(lid)
                     nmlgen.set_value('logfile', logfile)
 
-                    # change for reanalysis: make a simple update to the file if it exists
                     # Write output file
                     modelio_file = model + "_modelio.nml" + inst_string
                     nmlgen.write_modelio_file(os.path.join(confdir, modelio_file))
 
                     inst_index = inst_index + 1
 
-    print('Elapsed time:' + str(time.time() - start))
+    #print('Elapsed time:' + str(time.time() - start))
 
 ###############################################################################
 def buildnml(case, caseroot, component):
