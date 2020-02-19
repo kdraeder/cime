@@ -372,9 +372,7 @@ def _create_component_modelio_namelists(case, files):
                     # change for reanalysis: make a simple update to the file if it exists
                     # Write output file
                     modelio_file = model + "_modelio.nml" + inst_string
-                    mfile = os.path.join(confdir, modelio_file)
-                   
-                    nmlgen.write_modelio_file(mfile)
+                    nmlgen.write_modelio_file(os.path.join(confdir, modelio_file))
 
                     inst_index = inst_index + 1
 
