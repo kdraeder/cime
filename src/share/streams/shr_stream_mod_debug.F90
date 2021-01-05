@@ -1127,6 +1127,8 @@ contains
              end if
           end if
           do n=1,strm%file(k)%nt
+! KDR dDateF is Jan 1 of the first year in the data sequence.
+!     Isn't it less than all (but 1) dates on all the data files?
              if ( dDateF <= strm%file(k)%date(n) ) then
                 !--- found a date in or beyond yearFirst ---
                 strm%k_lvd = k
@@ -1166,6 +1168,9 @@ contains
        k = strm%k_gvd
        n = strm%n_gvd
        rDategvd = strm%file(k)%date(n) + strm%file(k)%secs(n)/spd ! GVD date + frac day
+       write(s_logunit,"(a,i9.8,f15.4,i6,i5,1x,a)") &
+            "(shr_stream_findBounds) DEBUG: found GVD, rDategvd, file_k_gvd, date_n_gvd ", &
+            strm%file(k)%date(n), rDategvd,k,n
     else
        rDategvd = 99991231.0
     endif
@@ -1269,6 +1274,9 @@ contains
        !   cycle -> lvd is UB, gvd is LB, shift mDateLB by +nYears
        !-----------------------------------------------------------
 
+! KDR died here.  There's a (re?)definition of rDategvd in the 'else' section, below.
+!     else if (strm%found_gvd .and. rDateIn > rDategvd) then
+! orig    
     else if (strm%found_gvd .and. rDateIn >= rDategvd) then
        if (limit) then
           write(s_logunit,*) trim(subName)," ERROR: limit on and rDateIn gt rDategvd",rDateIn,rDategvd
@@ -1327,6 +1335,10 @@ contains
        !-----------------------------------------------------------
        k_lb = strm%k_lvd
        n_lb = strm%n_lvd
+! KDR; WARNING; k is a file index here, instead of a stream index as in other places.
+!               n is the time index
+       write(s_logunit,'(a,2i)') 'dateIn > rDatelvd: loop over strm%k_lvd,strm%nFiles = ', &
+            strm%k_lvd, strm%nFiles
        C:    do k=strm%k_lvd,strm%nFiles
           !--- read data for file number k ---
           if (.not. strm%file(k)%haveData) then
@@ -1339,9 +1351,18 @@ contains
           !--- examine t-coords for file k ---
           n      = strm%file(k)%nt                                 ! last t-index in file
           rDate1 = strm%file(k)%date(n) + strm%file(k)%secs(n)/spd ! last date + frac day
+! KDR
+          write(s_logunit,'(a,i,f15.4)') "file#, rDate1 (the LAST time on the file) = ", k,rDate1
 
+! KDR k_gvd  for         ! dateIn > rDatelvd
+! This must be where it's set
           if (.not. strm%found_gvd) then
              n = strm%file(k)%nt
+! KDR        check the end time, other if-test vars
+             write(s_logunit,'(a,3i)') &
+                  '   No found_gvd.  dDateL, strm%file(k)%date(nt), strm%nFiles = ', &
+                                     dDateL, strm%file(k)%date(n), strm%nFiles
+
              if (dDateL <= strm%file(k)%date(n)) then
                 !--- set gvd to last timestep in previous file then advance through current file ---
                 if (k > 1) then
@@ -1365,7 +1386,12 @@ contains
                 kf = strm%k_gvd
                 nf = strm%n_gvd
                 rDategvd = strm%file(kf)%date(nf) + strm%file(kf)%secs(nf)/spd ! GVD date + frac day
+! KDR check the final values of this iteration over files.
+                write(s_logunit,'(a,2i,f15.4)') '    found_gvd = true;  strm%{k,n}_gvd {file,timeslot} now = ',kf,nf, rDategvd
              endif
+! KDR check when found_gvd is false too
+             if (.not.strm%found_gvd) write(s_logunit,'(a,2i,f15.4)') &
+                '  found_gvd = false;  strm%{k,n}_gvd {file,timeslot} now = ',kf,nf, rDategvd
           end if
 
           !-----------------------------------------------------------
@@ -1375,6 +1401,10 @@ contains
           !   cycle -> lvd is UB, gvd is LB, shift mDateLB by nYears
           !-----------------------------------------------------------
 
+! KDR
+!         Maybe found_gvd is being set wrong, which triggers this test prematurely.
+!           if (strm%found_gvd .and. rDateIn > rDategvd) then
+! orig
           if (strm%found_gvd .and. rDateIn >= rDategvd) then
              if (limit) then
                 write(s_logunit,*) trim(subName)," ERROR: limit on and rDateIn gt rDategvd",rDateIn,rDategvd
@@ -1452,13 +1482,17 @@ contains
                    secLB = strm%file(k_lb)%secs(n_lb)
                    fileLB = strm%file(k_lb)%name
 
+! KDR; can this work if the lb and ub are on different files?  Apparently.
                    dDateUB = strm%file(k_ub)%date(n_ub)
                    call shr_cal_date2ymd(dDateUB,yy,mm,dd)
                    yy = yy + (mYear-dYear)
                    call shr_cal_ymd2date(yy,mm,dd,mDateUB)
                    secUB = strm%file(k_ub)%secs(n_ub)
                    fileUB = strm%file(k_ub)%name
-                   !                  write(s_logunit,*)'tcx fb7 ',n_lb,mDateLB,secLB,n_ub,mDateUB,secUB
+! KDR; uncommented this print
+                                     write(s_logunit,*)'tcx fb7 ',n_lb,mDateLB,secLB,n_ub,mDateUB,secUB
+! Added these
+                                     write(s_logunit,*)'   k, dDate data =',k_lb,dDateLB,k_ub,dDateUB
                    !                  call shr_sys_flush(s_logunit)
                    return
                 endif
@@ -1567,6 +1601,10 @@ contains
     if (rcode /= nf90_noerr) call shr_sys_abort(subname//' ERROR: nf90_get_var')
     rCode = nf90_close(fid)
     if (rcode /= nf90_noerr) call shr_sys_abort(subname//' ERROR: nf90_close')
+! KDR bunits is the time:units string (I believe),
+!     which is necessary for reading the SST file,
+!     which stores times as integers, which are relative to the initial time 
+!     specified in the time:units metadata.  The new (avhrr_2.1) initial time is 12Z.
     do n = 1,nt
        call shr_cal_advDate(tvar(n),bunits,bdate,bsec,ndate,nsec,calendar)
        strm%file(k)%date(n) = ndate
@@ -2702,6 +2740,10 @@ contains
        read(nUnit) inpcs  ! dataSource   ! meta data identifying data source
        read(nUnit) inpcl  ! filePath     ! remote location of files
 
+! KDR; added for debugging.
+       write(s_logunit,F05) "stream(k), nFiles = ",k,nFiles
+
+! KDR: This processes all 7 files.
        do n=1,nFiles                     ! data specific to each file...
           read(nUnit) name       ! the file name
           read(nUnit) haveData   ! has t-coord data been read in?
@@ -2744,6 +2786,20 @@ contains
                strm(k)%file(1)%date(nt),strm(k)%file(1)%secs(nt)
        endif
 
+! KDR debugging; data for last file in stream
+! This writes data for file 7, so it still looks good.
+       if (s_loglev > 0) write(s_logunit,F01) "* stream ",k," last file name = ",trim(strm(k)%file(nFiles)%name)
+       if (s_loglev > 0) write(s_logunit,F03) "* stream ",k," last have data = ",strm(k)%file(nFiles)%haveData
+       if (s_loglev > 0) write(s_logunit,F02) "* stream ",k," last nt        = ",strm(k)%file(nFiles)%nt
+       if (strm(k)%file(nFiles)%haveData) then
+          nt = strm(k)%file(nFiles)%nt
+          if (s_loglev > 0) write(s_logunit,F02) "* stream ",k," first date secs = ", &
+               strm(k)%file(nFiles)%date(1),strm(k)%file(nFiles)%secs(1)
+          if (s_loglev > 0) write(s_logunit,F02) "* stream ",k," last  date secs = ", &
+               strm(k)%file(nFiles)%date(nt),strm(k)%file(nFiles)%secs(nt)
+       endif
+! end KDR
+
        ! tcraig, apr 2 2012, offset is the only field that should not change here for time axis
        !      read(nUnit) strm(k)%yearFirst     ! last  year to use in t-axis (yyyymmdd)
        !      read(nUnit) strm(k)%yearLast     ! last  year to use in t-axis (yyyymmdd)
@@ -2775,12 +2831,26 @@ contains
        read(nUnit) k_lvd        ! file        of least valid date
        read(nUnit) n_lvd        !      sample of least valid date
        read(nUnit) found_lvd    ! T <=> k_lvd,n_lvd have been set
+!KDR  k_lvd is read in here, and has the wrong value; 6
+!     What file is attached to nUnit?
+!     If it's the same avhrr file as for k_lvd, then of course it's wrong.
+!     If it's some other file, created from this stream, then just the value is wrong.
        read(nUnit) k_gvd        ! file        of greatest valid date
        read(nUnit) n_gvd        !      sample of greatest valid date
        read(nUnit) found_gvd    ! T <=> k_gvd,n_gvd have been set
        ! tcraig, april 2012, only overwrite if restart read is ok
        if (readok) then
-          write(s_logunit,F05) "setting k n and found lvd gvd on restart ",k,n,' ',trim(name)
+! KDR: We're outside of the n loop!  So it has the value #files_in_this_stream + 1 = 8.
+!      And 'name' is leftover from the last iteration of that loop; worthless?
+! orig          write(s_logunit,F05) "setting k n and found lvd gvd on restart ",k,n,' ',trim(name)
+! KDR; trying to write strm fails.  
+!      That's because k_lvd refers to a FILE number, while above k refers to a STREAM.
+!      Marvelous coding.
+          write(s_logunit,"(a,2i,l,a)") "(shr_stream_restRead) setting {k,n,found} for lvd on restart file ", &
+                                        k_lvd,n_lvd, found_lvd, strm(1)%file(k_lvd)%name
+!                                   k_lvd,n_lvd, found_lvd, strm(k_lvd)%file(n_lvd)%name
+          write(s_logunit,"(a,2i,l,a)") "(shr_stream_restRead) setting {k,n,found} for gvd on restart file ", &
+                               k_gvd,n_gvd,found_gvd,strm(1)%file(k_gvd)%name
           strm(k)%k_lvd     = k_lvd
           strm(k)%n_lvd     = n_lvd
           strm(k)%found_lvd = found_lvd

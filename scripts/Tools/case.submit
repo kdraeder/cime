@@ -16,6 +16,10 @@ Other examples:
    # KDR:
    ./case.submit -j case.st_archive
       Submits the short term archiver
+      NOTE ! ! !  If I'm trying to save a non-"interim" restart set,
+                  set     <entry id="DOUT_S_SAVE_INTERIM_RESTART_FILES" value="TRUE">
+                  or everything but the .i. files may be blown away.
+
       --resubmit   turns on resubmission (of the next case.run cycles)/
                    Resubmission can be turned off only by setting env_run.xml:RESUBMIT=0
 """
